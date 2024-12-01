@@ -2,7 +2,9 @@
   "name": "musicbot",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "start": "node index.js"
+  },
   "author": "wsquarepa",
   "license": "GPL-3.0",
   "description": ""

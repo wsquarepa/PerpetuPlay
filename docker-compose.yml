@@ -2,6 +2,18 @@ services:
   bot:
     build: ./bot
     container_name: bot
+    depends_on:
+      - redis
+    environment:
+      - BOT_TOKEN=
+
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+
+      - MUSIC_DIRECTORY= # Music directory on local machine
+      
+      - CHANNEL_ID= # Voice channel ID
     networks:
       - musicbot-network
 
@@ -14,6 +26,12 @@ services:
       - musicbot-network
     ports:
       - "8080:8080"
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    networks:
+      - musicbot-network
 
 networks:
   musicbot-network:
