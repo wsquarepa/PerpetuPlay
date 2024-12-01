@@ -1,0 +1,20 @@
+services:
+  bot:
+    build: ./bot
+    container_name: bot
+    networks:
+      - musicbot-network
+
+  web:
+    build: ./web
+    container_name: web
+    depends_on:
+      - bot
+    networks:
+      - musicbot-network
+    ports:
+      - "8080:8080"
+
+networks:
+  musicbot-network:
+    driver: bridge
