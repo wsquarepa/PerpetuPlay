@@ -14,6 +14,8 @@ services:
       - MUSIC_DIRECTORY= # Music directory on local machine
       
       - CHANNEL_ID= # Voice channel ID
+
+      - WEB_DASHBOARD_BASE_URL=http://localhost:8080 # Web dashboard base URL. Make sure to change it to your domain.
     networks:
       - musicbot-network
 

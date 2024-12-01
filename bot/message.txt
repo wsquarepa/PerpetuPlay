@@ -1,0 +1,8 @@
+MusicBot - 24/7 Music Radio
+Hello there! It seems like you have pinged me. Sadly, I don't have any commands you can run from Discord.
+
+To operate me, please head to the [web dashboard]({{URL}}). You can sign in and run me from there. 
+
+In any case, enjoy your music listening experience!
+
+P.S. Bot Owner: You can edit `./bot/message.txt` to edit this message!
