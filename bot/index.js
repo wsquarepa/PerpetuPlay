@@ -5,7 +5,7 @@ const WEB_DASHBOARD_BASE_URL = process.env.WEB_DASHBOARD_BASE_URL;
 import fs from 'fs';
 import path from 'path';
 
-import { Client, EmbedBuilder, Events, GatewayIntentBits } from 'discord.js';
+import { Client, EmbedBuilder, Events, GatewayIntentBits, PermissionFlagsBits } from 'discord.js';
 import { createAudioPlayer, AudioPlayerStatus, joinVoiceChannel, VoiceConnectionStatus } from '@discordjs/voice';
 
 import { nextResourceFile, getQueue, play } from './music.js';
@@ -21,21 +21,64 @@ const client = new Client({
 });
 
 // Inter-app communication
-const subscriber = createClient({
+const redisClient = createClient({
     host: process.env.REDIS_HOST,
     port: process.env.REDIS_PORT,
     password: process.env.REDIS_PASSWORD
 });
 
-subscriber.on('error', (error) => {
+redisClient.on('error', (error) => {
     console.error(error);
 });
 
+const publisher = redisClient.duplicate();
+const subscriber = redisClient.duplicate();
 await subscriber.connect()
-subscriber.subscribe('im-ch');
+subscriber.subscribe('im-ch-bot', async (message) => {
+    console.log(`Received message: ${message}`);
 
-subscriber.on('message', (channel, message) => {
-    console.log(`Received message from ${channel}: ${message}`);
+    const { requestId, data } = JSON.parse(message);
+
+    switch (data.type) {
+        case 'login':
+            const userId = data.userId;
+            const guildId = data.guildId;
+
+            const guild = await (await client.guilds.fetch()).find(g => g.id === guildId).fetch();
+            const member = await guild.members.fetch(userId);
+            
+            if (!member) {
+                return publisher.publish('im-ch-web', JSON.stringify({
+                    requestId,
+                    response: {
+                        success: false,
+                        message: 'User is not in the guild'
+                    }
+                }));
+            }
+
+            // check for manage guild permission
+            if (!member.permissions.has(PermissionFlagsBits.ManageGuild, true)) {
+                return publisher.publish('im-ch-web', JSON.stringify({
+                    requestId,
+                    response: {
+                        success: false,
+                        message: 'User does not have the required permissions'
+                    }
+                }));
+            }
+
+            publisher.publish('im-ch-web', JSON.stringify({
+                requestId,
+                response: {
+                    success: true
+                }
+            }));
+            break;
+        default:
+            console.error(`Unknown message type: ${data.type}`);
+            break;
+    }
 });
 
 // discord stuff

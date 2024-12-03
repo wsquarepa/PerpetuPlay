@@ -7,5 +7,15 @@
   },
   "author": "wsquarepa",
   "license": "GPL-3.0",
-  "description": ""
+  "description": "",
+  "type": "module",
+  "dependencies": {
+    "connect-redis": "^8.0.0",
+    "cookie-parser": "^1.4.7",
+    "express": "^4.21.1",
+    "express-session": "^1.18.1",
+    "passport": "^0.7.0",
+    "passport-discord": "^0.1.4",
+    "redis": "^4.7.0"
+  }
 }
