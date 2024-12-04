@@ -30,7 +30,7 @@ async function indexMusicFiles() {
     try {
         await redisClient.connect();
 
-        const listName = 'music_paths';
+        const listName = 'available_music_files';
         await redisClient.del(listName); 
         console.log(`Cleared Redis list: ${listName}`);
 

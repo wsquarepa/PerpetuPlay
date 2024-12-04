@@ -149,10 +149,7 @@ client.on(Events.ClientReady, async () => {
         loop: 'queue'
     });
     
-    const resolve = await player.riffy.resolve({
-        query: '/opt/Lavalink/music/IJ.mp3',
-        source: 'local'
-    })
+    const resolve = await player.node.rest.getTracks('/opt/Lavalink/music/IJ.mp3');
 
     console.log(resolve);
 });
