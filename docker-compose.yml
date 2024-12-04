@@ -1,9 +1,27 @@
 services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    networks:
+      - musicbot-network
+
+  indexing:
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+    working_dir: ./lavalink/
+    command: ["npm", "run", "migrate"]
+
   bot:
+    depends_on:
+      indexing:
+        condition: service_completed_successfully
     build: ./bot
     container_name: bot
-    depends_on:
-      - redis
     environment:
       - BOT_TOKEN=
 
@@ -20,10 +38,11 @@ services:
       - musicbot-network
 
   web:
+    depends_on:
+      indexing:
+        condition: service_completed_successfully
     build: ./web
     container_name: web
-    depends_on:
-      - bot
     environment:
       - DISCORD_CLIENT_ID=
       - DISCORD_CLIENT_SECRET=
@@ -35,9 +54,17 @@ services:
     ports:
       - "8080:8080"
 
-  redis:
-    image: redis:latest
-    container_name: redis
+  lavalink:
+    image: fredboat/lavalink:master
+    container_name: lavalink
+    restart: unless-stopped
+    environment:
+      - _JAVA_OPTIONS=-Xmx6G
+      - SERVER_PORT=2333
+    volumes:
+      - ./lavalink/:/opt/Lavalink/ 
+    expose:
+      - 2333
     networks:
       - musicbot-network
 

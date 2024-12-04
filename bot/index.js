@@ -5,12 +5,9 @@ const WEB_DASHBOARD_BASE_URL = process.env.WEB_DASHBOARD_BASE_URL;
 import fs from 'fs';
 import path from 'path';
 
-import { Client, EmbedBuilder, Events, GatewayIntentBits, PermissionFlagsBits } from 'discord.js';
-import { createAudioPlayer, AudioPlayerStatus, joinVoiceChannel, VoiceConnectionStatus } from '@discordjs/voice';
-
-import { nextResourceFile, getQueue, play } from './music.js';
-
+import { Client, EmbedBuilder, Events, GatewayDispatchEvents, GatewayIntentBits, PermissionFlagsBits } from 'discord.js';
 import { createClient } from 'redis';
+import { Riffy } from 'riffy';
 
 const client = new Client({
     intents: [
@@ -18,6 +15,31 @@ const client = new Client({
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildVoiceStates
     ]
+});
+
+const nodes = [
+    {
+        name: 'remote',
+        host: process.env.LAVALINK_ADDRESS || 'localhost',
+        port: process.env.LAVALINK_PORT || 2333,
+        secure: (process.env.LAVALINK_SECURE == 'true') || false,
+        password: process.env.LAVALINK_PASSWORD || 'youshallnotpass'
+    },
+    {
+        name: 'production',
+        host: 'lavalink',
+        port: 2333,
+        secure: false
+    }
+]
+
+const riffy = new Riffy(client, nodes, {
+    send: (payload) => {
+        const guild = client.guilds.cache.get(payload.d.guild_id);
+        if (guild) guild.shard.send(payload);
+    },
+    defaultSearchPlatform: 'ytmsearch',
+    restVersion: "v4"
 });
 
 // Inter-app communication
@@ -102,51 +124,56 @@ client.on(Events.MessageCreate, message => {
     });
 });
 
-// music stuff
-let connection;
-const player = createAudioPlayer();
-
-player.on(AudioPlayerStatus.Idle, async () => {
-    console.log('Playing next song...');
-    play(player, client, nextResourceFile());
-});
-
 client.on(Events.ClientReady, async () => {
+    riffy.init(client.user.id);
     console.log(`Logged in as ${client.user.tag}!`);
 
     const channel = await client.channels.fetch(CHANNEL_ID);
 
-    connection = joinVoiceChannel({
-        channelId: channel.id,
-        guildId: channel.guild.id,
-        adapterCreator: channel.guild.voiceAdapterCreator
+    if (!channel.isVoiceBased()) {
+        console.error('Channel is not voice based');
+        return;
+    }
+
+    await new Promise((resolve) => {
+        riffy.once('nodeConnect', () => {
+            resolve();
+        });
     });
 
-    connection.on(VoiceConnectionStatus.Ready, () => {
-        console.log('Connection is ready!');
-
-        connection.subscribe(player);
-
-        console.log('Starting music stream...');
-        play(player, client, nextResourceFile());
+    const player = riffy.createConnection({
+        guildId: channel.guild.id,
+        voiceChannel: channel.id,
+        textChannel: channel.id,
+        deaf: true,
+        loop: 'queue'
+    });
+    
+    const resolve = await player.riffy.resolve({
+        query: '/opt/Lavalink/music/IJ.mp3',
+        source: 'local'
     })
 
-    connection.on(VoiceConnectionStatus.Disconnected, async () => {
-        try {
-            await Promise.race([
-                entersState(connection, VoiceConnectionStatus.Signalling, 5_000),
-                entersState(connection, VoiceConnectionStatus.Connecting, 5_000)
-            ]);
-            // Seems to be reconnecting to a new channel - ignore disconnect
-        } catch (error) {
-            // Seems to be a real disconnect which SHOULDN'T be recovered from
-            connection.destroy();
-        }
-    });
+    console.log(resolve);
+});
 
-    connection.on(VoiceConnectionStatus.Destroyed, () => {
-        console.log('Connection was destroyed!');
-    });
+// riffy stuff
+riffy.on('nodeConnect', (node) => {
+    console.log(`Node ${node.name} connected`);
+});
+
+riffy.on('nodeError', (node, error) => {
+    console.error(`Node ${node.name} encountered an error: ${error}`);
+});
+
+riffy.on('queueEnd', async (player) => {
+    console.log('Queue ended... wait a second, shouldn\'t this be an infinite loop?');
+    player.disconnect();
+});
+
+client.on(Events.Raw, (d) => {
+    if (![GatewayDispatchEvents.VoiceStateUpdate, GatewayDispatchEvents.VoiceServerUpdate].includes(d.t)) return;
+    riffy.updateVoiceState(d);
 });
 
 client.login(DISCORD_BOT_TOKEN);

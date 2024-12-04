@@ -130,4 +130,5 @@ dist
 .pnp.*
 
 # other dev files
-music/
+lavalink/music/*
+!lavalink/music/*.txt

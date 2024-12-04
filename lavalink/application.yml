@@ -1,0 +1,63 @@
+server:
+  port: 2333
+  address: 0.0.0.0
+  http2:
+    enabled: false
+
+lavalink:
+  plugins: []
+  server:
+    password: ""
+    sources:
+      youtube: false
+      bandcamp: false
+      soundcloud: false
+      twitch: false
+      vimeo: false
+      nico: false
+      http: false
+      local: true
+    filters:
+      volume: true
+      equalizer: true
+      karaoke: true
+      timescale: true
+      tremolo: true
+      vibrato: true
+      distortion: true
+      rotation: true
+      channelMix: true
+      lowPass: true
+    nonAllocatingFrameBuffer: false
+    bufferDurationMs: 400
+    frameBufferDurationMs: 5000
+    opusEncodingQuality: 10  # Decrease for better performance. 10 is max quality.
+    resamplingQuality: HIGH # Change to "LOW" if you have performance issues
+    trackStuckThresholdMs: 10000 
+    useSeekGhosting: true 
+    youtubePlaylistLoadLimit: 6 
+    playerUpdateInterval: 5 # How frequently to send player updates to clients, in seconds
+    youtubeSearchEnabled: false
+    soundcloudSearchEnabled: false
+    gc-warnings: true
+
+logging:
+  file:
+    path: ./logs/
+
+  level:
+    root: INFO
+    lavalink: INFO
+
+  request:
+    enabled: true
+    includeClientInfo: true
+    includeHeaders: false
+    includeQueryString: true
+    includePayload: true
+    maxPayloadLength: 10000
+
+  logback:
+    rollingpolicy:
+      max-file-size: 1GB
+      max-history: 30

@@ -1,0 +1,15 @@
+{
+  "name": "musicbot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "migrate": "node index.js"
+  },
+  "author": "wsquarepa",
+  "license": "GPL-3.0",
+  "description": "",
+  "type": "module",
+  "dependencies": {
+    "redis": "^4.7.0"
+  }
+}
