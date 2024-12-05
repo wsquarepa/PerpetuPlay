@@ -50,7 +50,6 @@ services:
       - BOT_TOKEN=${BOT_TOKEN}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - MUSIC_DIRECTORY=${MUSIC_DIRECTORY}
       - CHANNEL_ID=${CHANNEL_ID}
       - WEB_DASHBOARD_BASE_URL=${WEB_DASHBOARD_BASE_URL}
     networks:
