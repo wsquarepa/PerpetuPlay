@@ -3,9 +3,8 @@ import { createClient } from 'redis';
 
 // Create Redis client
 const client = createClient({
-    host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT,
-    password: process.env.REDIS_PASSWORD
+    url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+    password: process.env.REDIS_PASSWORD,
 });
 
 client.on('error', (error) => {
