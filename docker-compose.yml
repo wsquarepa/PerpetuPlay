@@ -70,7 +70,8 @@ services:
       - _JAVA_OPTIONS=-Xmx6G
       - SERVER_PORT=2333
     volumes:
-      - ./lavalink/:/opt/Lavalink/
+      - ./lavalink/application.yml:/opt/Lavalink/application.yml
+      - ./lavalink/music/:/opt/Lavalink/music/
     expose:
       - 2333
     networks:
