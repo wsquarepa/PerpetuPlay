@@ -10,7 +10,7 @@ import path from 'path';
 
 import { Client, EmbedBuilder, Events, GatewayDispatchEvents, GatewayIntentBits, PermissionFlagsBits } from 'discord.js';
 import { createClient } from 'redis';
-import { Riffy } from 'riffy';
+import { Riffy, Track } from 'riffy';
 
 const client = new Client({
     intents: [
@@ -123,7 +123,11 @@ async function getNextTrack(player) {
         return getNextTrack(player);
     }
 
-    return await player.node.rest.getTracks(filePath);
+    const serverData = await player.node.rest.getTracks(filePath)
+    
+    const track = new Track(serverData.data, client.user, player.node);
+
+    return track;
 } 
 
 // discord stuff
@@ -175,14 +179,14 @@ client.on(Events.ClientReady, async () => {
     await reloadPlaylist();
 
     // get the first song
-    const firstTrack = await getNextTrack(player);
+    const track = await getNextTrack(player);
 
-    if (!firstTrack) {
+    if (!track) {
         console.error('No tracks found');
         return;
     }
 
-    player.queue.add(firstTrack);
+    player.queue.add(track);
     player.play();
 });
 
