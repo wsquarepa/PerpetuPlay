@@ -9,6 +9,8 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+    build:
+      context: .
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -62,7 +64,7 @@ services:
       - _JAVA_OPTIONS=-Xmx6G
       - SERVER_PORT=2333
     volumes:
-      - ./lavalink/:/opt/Lavalink/ 
+      - ./lavalink/:/opt/Lavalink/
     expose:
       - 2333
     networks:
