@@ -2,6 +2,9 @@ const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const CHANNEL_ID = process.env.CHANNEL_ID;
 const WEB_DASHBOARD_BASE_URL = process.env.WEB_DASHBOARD_BASE_URL;
 
+const PATH_LIST_NAME = 'available_music_files';
+const PLAYLIST_CACHE_NAME = 'playlist';
+
 import fs from 'fs';
 import path from 'path';
 
@@ -49,9 +52,7 @@ const redisClient = createClient({
     password: process.env.REDIS_PASSWORD
 });
 
-redisClient.on('error', (error) => {
-    console.error(error);
-});
+redisClient.on('error', (error) => { console.error(error); });
 
 const publisher = redisClient.duplicate();
 const subscriber = redisClient.duplicate();
@@ -103,6 +104,36 @@ subscriber.subscribe('im-ch-bot', async (message) => {
     }
 });
 
+// playlist stuff
+
+await redisClient.connect();
+redisClient.on('error', (error) => { console.error(error); });
+
+async function reloadPlaylist() {
+    const filePaths = await redisClient.lRange(PATH_LIST_NAME, 0, -1);
+
+    if (!filePaths.length) {
+        console.error('No files found');
+        return;
+    }
+
+    filePaths.sort(() => Math.random() - 0.5);
+
+    await redisClient.del(PLAYLIST_CACHE_NAME);
+    await redisClient.rPush(PLAYLIST_CACHE_NAME, ...filePaths);
+}
+
+async function getNextTrack(player) {
+    const filePath = await redisClient.lPop(PLAYLIST_CACHE_NAME);
+
+    if (!filePath) {
+        await reloadPlaylist();
+        return getNextTrack(player);
+    }
+
+    return await player.node.rest.getTracks(filePath);
+} 
+
 // discord stuff
 client.on(Events.MessageCreate, message => {
     if (message.author.bot) return;
@@ -148,10 +179,19 @@ client.on(Events.ClientReady, async () => {
         deaf: true,
         loop: 'queue'
     });
-    
-    const resolve = await player.node.rest.getTracks('/opt/Lavalink/music/IJ.mp3');
 
-    console.log(resolve);
+    await reloadPlaylist();
+
+    // get the first song
+    const firstTrack = await getNextTrack(player);
+
+    if (!firstTrack) {
+        console.error('No tracks found');
+        return;
+    }
+
+    player.queue.add(firstTrack);
+    player.play();
 });
 
 // riffy stuff
@@ -164,8 +204,14 @@ riffy.on('nodeError', (node, error) => {
 });
 
 riffy.on('queueEnd', async (player) => {
-    console.log('Queue ended... wait a second, shouldn\'t this be an infinite loop?');
-    player.disconnect();
+    const nextTrack = await getNextTrack(player);
+
+    if (!nextTrack) {
+        await reloadPlaylist();
+    }
+
+    player.queue.add(nextTrack);
+    player.play();
 });
 
 client.on(Events.Raw, (d) => {
