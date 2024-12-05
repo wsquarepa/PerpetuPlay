@@ -8,7 +8,7 @@ const PLAYLIST_CACHE_NAME = 'playlist';
 import fs from 'fs';
 import path from 'path';
 
-import { Client, EmbedBuilder, Events, GatewayDispatchEvents, GatewayIntentBits, PermissionFlagsBits } from 'discord.js';
+import { ActivityType, Client, EmbedBuilder, Events, GatewayDispatchEvents, GatewayIntentBits, PermissionFlagsBits } from 'discord.js';
 import { createClient } from 'redis';
 import { Riffy, Track } from 'riffy';
 
@@ -97,7 +97,6 @@ subscriber.subscribe('im-ch-bot', async (message) => {
 });
 
 // playlist stuff
-
 await redisClient.connect();
 redisClient.on('error', (error) => { console.error(error); });
 
@@ -128,7 +127,28 @@ async function getNextTrack(player) {
     const track = new Track(serverData.data, client.user, player.node);
 
     return track;
-} 
+}
+
+async function playNextTrack(player, retries = 0) {
+    const track = await getNextTrack(player);
+
+    if (!track) {
+        if (retries >= 3) {
+            console.error('Failed to get next track');
+            return;
+        }
+
+        await reloadPlaylist();
+        playNextTrack(player, retries + 1);
+        return;
+    }
+
+    player.queue.add(track);
+    player.play();
+
+    client.user.setActivity(track.info.title + " | " + track.info.author, { type: ActivityType.Listening });
+    console.log(`Playing: ${track.info.title} by ${track.info.author}`);
+}
 
 // discord stuff
 client.on(Events.MessageCreate, message => {
@@ -172,22 +192,12 @@ client.on(Events.ClientReady, async () => {
         guildId: channel.guild.id,
         voiceChannel: channel.id,
         textChannel: channel.id,
-        deaf: true,
-        loop: 'queue'
+        deaf: true
     });
 
     await reloadPlaylist();
 
-    // get the first song
-    const track = await getNextTrack(player);
-
-    if (!track) {
-        console.error('No tracks found');
-        return;
-    }
-
-    player.queue.add(track);
-    player.play();
+    playNextTrack(player);
 });
 
 // riffy stuff
@@ -200,14 +210,7 @@ riffy.on('nodeError', (node, error) => {
 });
 
 riffy.on('queueEnd', async (player) => {
-    const nextTrack = await getNextTrack(player);
-
-    if (!nextTrack) {
-        await reloadPlaylist();
-    }
-
-    player.queue.add(nextTrack);
-    player.play();
+    playNextTrack(player);
 });
 
 client.on(Events.Raw, (d) => {
