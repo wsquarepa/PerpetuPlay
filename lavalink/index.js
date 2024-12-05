@@ -1,6 +1,20 @@
 import { createClient } from 'redis';
 import { readdir } from 'fs/promises';
 import { resolve, extname } from 'path';
+import { exec } from 'child_process';
+
+async function ls(path) {
+    return new Promise((resolve, reject) => {
+        exec(`ls ${path}`, (err, stdout, stderr) => {
+            if (err) return reject(err);
+            if (stderr) return reject(stderr);
+            resolve(stdout);
+        });
+    });
+}
+
+console.log("Files found in /music:");
+console.log(await ls('/music'));
 
 const redisClient = createClient({
     url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`

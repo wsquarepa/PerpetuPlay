@@ -11,7 +11,7 @@ services:
       retries: 60
 
   lavalink:
-    image: ghcr.io/lavalink-devs/lavalink:4
+    image: fredboat/lavalink:4.0-alpine
     container_name: lavalink
     restart: unless-stopped
     environment:
