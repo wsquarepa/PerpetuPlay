@@ -100,7 +100,27 @@ subscriber.subscribe('im-ch-bot', async (message) => {
 await redisClient.connect();
 redisClient.on('error', (error) => { console.error(error); });
 
+// Fisher-Yates shuffle
+// Sourced from https://stackoverflow.com/a/2450976
+function shuffle(array) {
+    let currentIndex = array.length;
+  
+    // While there remain elements to shuffle...
+    while (currentIndex != 0) {
+  
+      // Pick a remaining element...
+      let randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+  
+      // And swap it with the current element.
+      [array[currentIndex], array[randomIndex]] = [
+        array[randomIndex], array[currentIndex]];
+    }
+}
+
 async function reloadPlaylist() {
+    console.log('Reloading playlist');
+
     const filePaths = await redisClient.lRange(PATH_LIST_NAME, 0, -1);
 
     if (!filePaths.length) {
@@ -108,18 +128,24 @@ async function reloadPlaylist() {
         return;
     }
 
-    filePaths.sort(() => Math.random() - 0.5);
+    console.log(`Found ${filePaths.length} files`);
+    
+    shuffle(filePaths);
 
     await redisClient.del(PLAYLIST_CACHE_NAME);
-    await redisClient.rPush(PLAYLIST_CACHE_NAME, ...filePaths);
+    
+    for (const filePath of filePaths) {
+        await redisClient.lPush(PLAYLIST_CACHE_NAME, filePath);
+    }
 }
 
 async function getNextTrack(player) {
+    console.log('Getting next track');
+
     const filePath = await redisClient.lPop(PLAYLIST_CACHE_NAME);
 
     if (!filePath) {
-        await reloadPlaylist();
-        return getNextTrack(player);
+        return null;
     }
 
     const serverData = await player.node.rest.getTracks(filePath)
