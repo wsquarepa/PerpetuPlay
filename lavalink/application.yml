@@ -7,7 +7,7 @@ server:
 lavalink:
   plugins: []
   server:
-    password: ""
+    password: "youshallnotpass"
     sources:
       youtube: false
       bandcamp: false

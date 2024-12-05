@@ -26,7 +26,7 @@ const nodes = [
         host: 'lavalink',
         port: 2333,
         secure: false,
-        password: ''
+        password: 'youshallnotpass'
     }
 ]
 
