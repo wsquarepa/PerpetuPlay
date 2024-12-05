@@ -13,9 +13,6 @@ async function ls(path) {
     });
 }
 
-console.log("Files found in /music:");
-console.log(await ls('/music'));
-
 const redisClient = createClient({
     url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`
 });
@@ -46,8 +43,11 @@ async function indexMusicFiles() {
         await redisClient.del(listName); 
         console.log(`Cleared Redis list: ${listName}`);
 
-        const musicDir = resolve('/music');
+        const musicDir = resolve('/opt/Lavalink/music');
         console.log('Indexing files from:', musicDir);
+
+        console.log('Listing files...');
+        console.log(await ls(musicDir));
 
         const filePaths = await getAllFilePaths(musicDir);
 
