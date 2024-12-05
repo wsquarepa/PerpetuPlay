@@ -11,8 +11,8 @@ services:
         condition: service_healthy
     image: node:18
     volumes:
-      - ./lavalink:/
-    working_dir: /
+      - ./lavalink:/ll/
+    working_dir: /ll/
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
