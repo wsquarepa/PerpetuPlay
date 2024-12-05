@@ -9,14 +9,16 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-    build:
-      context: .
+    image: node:18
+    volumes:
+      - ./lavalink:/
+    working_dir: /
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
-    working_dir: ./lavalink/
     command: ["npm", "run", "migrate"]
+    restart: "no"
 
   bot:
     depends_on:
