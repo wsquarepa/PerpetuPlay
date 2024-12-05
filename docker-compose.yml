@@ -24,6 +24,11 @@ services:
       - 2333
     networks:
       - musicbot-network
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2333"]
+      interval: 1s
+      timeout: 5s
+      retries: 60
 
   indexing:
     depends_on:
@@ -44,6 +49,8 @@ services:
     depends_on:
       indexing:
         condition: service_completed_successfully
+      lavalink:
+        condition: service_healthy
     build: ./bot
     container_name: bot
     environment:
