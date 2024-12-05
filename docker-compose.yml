@@ -21,7 +21,7 @@ services:
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
     volumes:
-      - ./lavalink:/ll/
+      - ./lavalink/music/:/usr/src/app/music/
     networks:
       - musicbot-network
     restart: "no"
@@ -57,8 +57,13 @@ services:
       - DISCORD_CLIENT_ID=
       - DISCORD_CLIENT_SECRET=
       - DISCORD_CALLBACK_URL=http://localhost:8080/auth/cb # Discord callback URL. You need to add /auth/cb at the end.
+      
       - DISCORD_GUILD_ID= # Discord guild ID
       - SESSION_SECRET= # Session secret
+
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
     networks:
       - musicbot-network
     ports:
