@@ -18,8 +18,7 @@ services:
       - _JAVA_OPTIONS=-Xmx6G
       - SERVER_PORT=2333
     volumes:
-      - ./lavalink/application.yml:/opt/Lavalink/application.yml
-      - ./lavalink/music/:/opt/Lavalink/music/
+      - ./lavalink/:/opt/Lavalink/
     expose:
       - 2333
     networks:
@@ -35,7 +34,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     volumes:
-      - ./lavalink/music/:/usr/src/app/music/
+      - ./lavalink/music/:/music
     networks:
       - musicbot-network
     restart: "no"

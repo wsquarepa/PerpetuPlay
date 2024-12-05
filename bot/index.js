@@ -22,17 +22,11 @@ const client = new Client({
 
 const nodes = [
     {
-        name: 'remote',
-        host: process.env.LAVALINK_ADDRESS || 'localhost',
-        port: process.env.LAVALINK_PORT || 2333,
-        secure: (process.env.LAVALINK_SECURE == 'true') || false,
-        password: process.env.LAVALINK_PASSWORD || 'youshallnotpass'
-    },
-    {
         name: 'production',
         host: 'lavalink',
         port: 2333,
-        secure: false
+        secure: false,
+        password: ''
     }
 ]
 

@@ -32,7 +32,7 @@ async function indexMusicFiles() {
         await redisClient.del(listName); 
         console.log(`Cleared Redis list: ${listName}`);
 
-        const musicDir = resolve('./music');
+        const musicDir = resolve('/music');
         console.log('Indexing files from:', musicDir);
 
         const filePaths = await getAllFilePaths(musicDir);
