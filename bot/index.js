@@ -47,8 +47,7 @@ const riffy = new Riffy(client, nodes, {
 
 // Inter-app communication
 const redisClient = createClient({
-    url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
-    password: process.env.REDIS_PASSWORD,
+    url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`
 });
 
 redisClient.on('error', (error) => { console.error(error); });

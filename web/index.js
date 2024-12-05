@@ -18,8 +18,7 @@ import { RedisStore } from 'connect-redis';
 import { createClient } from 'redis';
 
 const keyv = createClient({
-    url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
-    password: process.env.REDIS_PASSWORD,
+    url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`
 });
 
 const redisStore = new RedisStore({

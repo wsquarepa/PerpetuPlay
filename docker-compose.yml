@@ -10,65 +10,6 @@ services:
       timeout: 5s
       retries: 60
 
-  indexing:
-    depends_on:
-      redis:
-        condition: service_healthy
-    build: ./lavalink
-    container_name: indexing
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=
-    volumes:
-      - ./lavalink/music/:/usr/src/app/music/
-    networks:
-      - musicbot-network
-    restart: "no"
-
-  bot:
-    depends_on:
-      indexing:
-        condition: service_completed_successfully
-    build: ./bot
-    container_name: bot
-    environment:
-      - BOT_TOKEN=
-
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=
-
-      - MUSIC_DIRECTORY= # Music directory on local machine
-
-      - CHANNEL_ID= # Voice channel ID
-
-      - WEB_DASHBOARD_BASE_URL=http://localhost:8080 # Web dashboard base URL. Make sure to change it to your domain.
-    networks:
-      - musicbot-network
-
-  web:
-    depends_on:
-      indexing:
-        condition: service_completed_successfully
-    build: ./web
-    container_name: web
-    environment:
-      - DISCORD_CLIENT_ID=
-      - DISCORD_CLIENT_SECRET=
-      - DISCORD_CALLBACK_URL=http://localhost:8080/auth/cb # Discord callback URL. You need to add /auth/cb at the end.
-      
-      - DISCORD_GUILD_ID= # Discord guild ID
-      - SESSION_SECRET= # Session secret
-
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=
-    networks:
-      - musicbot-network
-    ports:
-      - "8080:8080"
-
   lavalink:
     image: ghcr.io/lavalink-devs/lavalink:4
     container_name: lavalink
@@ -83,6 +24,56 @@ services:
       - 2333
     networks:
       - musicbot-network
+
+  indexing:
+    depends_on:
+      redis:
+        condition: service_healthy
+    build: ./lavalink
+    container_name: indexing
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    volumes:
+      - ./lavalink/music/:/usr/src/app/music/
+    networks:
+      - musicbot-network
+    restart: "no"
+
+  bot:
+    depends_on:
+      indexing:
+        condition: service_completed_successfully
+    build: ./bot
+    container_name: bot
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MUSIC_DIRECTORY=${MUSIC_DIRECTORY}
+      - CHANNEL_ID=${CHANNEL_ID}
+      - WEB_DASHBOARD_BASE_URL=${WEB_DASHBOARD_BASE_URL}
+    networks:
+      - musicbot-network
+
+  web:
+    depends_on:
+      indexing:
+        condition: service_completed_successfully
+    build: ./web
+    container_name: web
+    environment:
+      - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
+      - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
+      - DISCORD_CALLBACK_URL=${DISCORD_CALLBACK_URL}
+      - DISCORD_GUILD_ID=${DISCORD_GUILD_ID}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    networks:
+      - musicbot-network
+    ports:
+      - "8080:8080"
 
 networks:
   musicbot-network:
