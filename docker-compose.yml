@@ -15,14 +15,13 @@ services:
       redis:
         condition: service_healthy
     build: ./lavalink
-    volumes:
-      - ./lavalink:/ll/
-    working_dir: /ll/
+    container_name: indexing
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
-    command: ["npm", "run", "migrate"]
+    volumes:
+      - ./lavalink:/ll/
     restart: "no"
 
   bot:
