@@ -180,8 +180,12 @@ async function playNextTrack(player, retries = 0) {
 client.on(Events.MessageCreate, message => {
     if (message.author.bot) return;
     if (!message.mentions.has(client.user)) return;
+    if (message.content.split(' ').length > 1) return; // only respond to mentions
 
     const data = fs.readFileSync(path.join(process.cwd(), 'message.txt'));
+
+    if (data.length < 1) return;
+
     const lines = data.toString().split('\n');
     const title = lines[0];
     const description = lines.slice(1).join('\n');
