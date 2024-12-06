@@ -1,8 +1,8 @@
-MusicBot - 24/7 Music Radio
-Hello there! It seems like you have pinged me. Sadly, I don't have any commands you can run from Discord.
+PerpetuPlay - 24/7 Discord Radio
+Hello there! It seems like you have pinged me. Sadly, I don't have any commands you can run from Discord. If you want to listen to music, simply join me in the voice channel! I will already be playing music for you to enjoy, should the bot owner have provided music for me to play.
 
 To operate me, please head to the [web dashboard]({{URL}}). You can sign in and run me from there. 
 
-In any case, enjoy your music listening experience!
+Enjoy your music listening experience!
 
 P.S. Bot Owner: You can edit `./bot/message.txt` to edit this message!

@@ -3,7 +3,7 @@ services:
     image: redis:latest
     container_name: redis
     networks:
-      - musicbot-network
+      - perpetuplay-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 1s
@@ -23,7 +23,7 @@ services:
     expose:
       - 2333
     networks:
-      - musicbot-network
+      - perpetuplay-network
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "2333"]
       interval: 1s
@@ -42,7 +42,7 @@ services:
     volumes:
       - ./lavalink/music/:/opt/Lavalink/music
     networks:
-      - musicbot-network
+      - perpetuplay-network
     restart: "no"
 
   bot:
@@ -60,7 +60,7 @@ services:
       - CHANNEL_ID=${CHANNEL_ID}
       - WEB_DASHBOARD_BASE_URL=${WEB_DASHBOARD_BASE_URL}
     networks:
-      - musicbot-network
+      - perpetuplay-network
 
   web:
     depends_on:
@@ -77,10 +77,10 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     networks:
-      - musicbot-network
+      - perpetuplay-network
     ports:
       - "${PORT}:8080"
 
 networks:
-  musicbot-network:
+  perpetuplay-network:
     driver: bridge
