@@ -4,6 +4,8 @@ import sessionMiddleware from './config/session.js';
 import passport from './config/passport.js';
 import authRoutes from './routes/auth.js';
 import indexRoutes from './routes/index.js';
+import dashboardRoutes from './routes/dashboard.js';
+import apiRoutes from './routes/api.js';
 
 const app = express();
 
@@ -14,7 +16,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Routes
-app.use(authRoutes);
 app.use(indexRoutes);
+app.use('/auth', authRoutes);
+app.use('/dashboard', dashboardRoutes);
+app.use('/api', apiRoutes);
 
 export default app;

@@ -12,16 +12,17 @@ router.use((req, res, next) => {
     }
 });
 
+// will be replaced with react app later
 router.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/dashboard.html'));
+    res.sendFile(path.resolve('./public/dashboard.html'));
 });
 
 router.get('/css/dashboard.css', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/css/dashboard.css'));
+    res.sendFile(path.resolve('./public/css/dashboard.css'));
 });
 
 router.get('/js/dashboard.js', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/js/dashboard.js'));
+    res.sendFile(path.resolve('./public/js/dashboard.js'));
 });
 
 export default router;

@@ -62,12 +62,12 @@ services:
     networks:
       - perpetuplay-network
 
-  web:
+  backend:
     depends_on:
       indexing:
         condition: service_completed_successfully
-    build: ./web
-    container_name: web
+    build: ./backend
+    container_name: backend
     environment:
       - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
       - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
