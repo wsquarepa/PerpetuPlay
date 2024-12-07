@@ -46,9 +46,10 @@ const redisClient = createClient({
 
 redisClient.on('error', (error) => { console.error(error); });
 
-const publisher = redisClient.duplicate();
 const subscriber = redisClient.duplicate();
+const publisher = redisClient.duplicate();
 await subscriber.connect()
+await publisher.connect()
 subscriber.subscribe('im-ch-bot', async (message) => {
     console.log(`Received message: ${message}`);
 

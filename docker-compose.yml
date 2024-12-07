@@ -18,8 +18,8 @@ services:
       - _JAVA_OPTIONS=-Xmx6G
       - SERVER_PORT=2333
     volumes:
-      - ./lavalink/application.yml:/opt/Lavalink/application.yml
-      - ./lavalink/music:/opt/Lavalink/music
+      - ./lavalink/application.yml:/opt/Lavalink/application.yml:ro
+      - ./lavalink/music:/opt/Lavalink/music:ro
     expose:
       - 2333
     networks:
@@ -40,7 +40,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     volumes:
-      - ./lavalink/music/:/opt/Lavalink/music
+      - ./lavalink/music/:/opt/Lavalink/music/:ro
     networks:
       - perpetuplay-network
     restart: "no"
