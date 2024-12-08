@@ -41,7 +41,8 @@ function Player() {
             setStats({
                 title: data.title,
                 author: data.author,
-                length: data.length
+                length: data.length,
+                position: data.position
             });
 
             setCover(`/api/cover?f=${encodeURIComponent(data.identifier)}`);
