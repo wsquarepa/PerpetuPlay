@@ -24,13 +24,27 @@ router.get('/status', async (req, res) => {
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
 
+    let cachedResult = await negotiate({
+        type: 'status'
+    });
+
     const interval = setInterval(async () => {
         const result = await negotiate({
             type: 'status'
         });
 
-        res.write(`data: ${JSON.stringify(result)}\n\n`);
-    }, 3000);
+        const changedFields = Object.keys(result).filter((key) => result[key] !== cachedResult[key]);
+
+        for (const field of changedFields) {
+            res.write(`event: ${field}\n`);
+            res.write(`data: ${JSON.stringify({value: result[field]})}\n\n`);
+        }
+
+        cachedResult = result;
+    }, 1000);
+
+    res.write(`event: initialize\n`);
+    res.write(`data: ${JSON.stringify(cachedResult)}\n\n`);
 
     res.on('close', () => {
         clearInterval(interval);

@@ -61,8 +61,6 @@ function respond(requestId, response) {
 }
 
 subscriber.subscribe('im-ch-bot', async (message) => {
-    console.log(`Received message: ${message}`);
-
     const { requestId, data } = JSON.parse(message);
 
     switch (data.type) {
@@ -97,11 +95,11 @@ subscriber.subscribe('im-ch-bot', async (message) => {
             const player = riffy.get(guildId);
             respond(requestId, {
                 success: true,
-                node: player.node.stats,
-                track: {
-                    ...player.current.info,
-                    position: player.position
-                }
+                identifier: player.current.info.identifier,
+                title: player.current.info.title,
+                author: player.current.info.author,
+                length: player.current.info.length,
+                position: player.position
             });
             break;
         }

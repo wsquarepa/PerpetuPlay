@@ -8,7 +8,7 @@ function App() {
         fetch("/api/")
             .then((response) => {
                 if (response.status === 401) {
-                    window.location.href = "/auth";
+                    window.location.href = `${window.location.origin}/auth`;
                 }
             })
             .catch((error) => {

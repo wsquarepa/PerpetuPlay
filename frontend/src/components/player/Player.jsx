@@ -1,34 +1,55 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import "./Player.css";
 
 function Player() {
     const [stats, setStats] = useState(null);
     const [cover, setCover] = useState(null);
-    const [progress, setProgress] = useState(stats?.track.position);
+    const [progress, setProgress] = useState(0);
+
+    const lastReportedTime = useRef(Date.now()); 
 
     useEffect(() => {
-        let oldIdentifier = null;
-        let lastReportedPosition = 0;
-
         const eventSource = new EventSource("/api/status");
-        eventSource.onmessage = async (event) => {
-            const newStats = JSON.parse(event.data);
 
-            if (newStats.track.identifier != oldIdentifier) {
-                setCover(`/api/cover?f=${encodeURIComponent(newStats.track.identifier)}`);
+        eventSource.addEventListener("identifier", (event) => {
+            setCover(`/api/cover?f=${encodeURIComponent(JSON.parse(event.data).value)}`);
+        });
 
-                oldIdentifier = newStats.track.identifier;
-            }
+        eventSource.addEventListener("title", (event) => {
+            setStats((prev) => ({ ...prev, title: JSON.parse(event.data).value }));
+        });
 
-            setStats(newStats);
+        eventSource.addEventListener("author", (event) => {
+            setStats((prev) => ({ ...prev, author: JSON.parse(event.data).value }));
+        });
 
-            if (newStats.track.position != lastReportedPosition) {            
-                setProgress(newStats.track.position);
+        eventSource.addEventListener("length", (event) => {
+            setStats((prev) => ({ ...prev, length: JSON.parse(event.data).value }));
+        });
 
-                lastReportedPosition = newStats.track.position;
-            }
-        };
+        eventSource.addEventListener("position", (event) => {
+            setProgress(JSON.parse(event.data).value);
+            setStats((prev) => ({ ...prev, position: JSON.parse(event.data).value }));
+
+            lastReportedTime.current = Date.now();
+        });
+
+        eventSource.addEventListener("initialize", (event) => {
+            const data = JSON.parse(event.data);
+
+            setStats({
+                title: data.title,
+                author: data.author,
+                length: data.length
+            });
+
+            setCover(`/api/cover?f=${encodeURIComponent(data.identifier)}`);
+
+            lastReportedTime.current = Date.now();
+            
+            setProgress(data.position);
+        });
 
         return () => {
             eventSource.close();
@@ -37,13 +58,18 @@ function Player() {
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setProgress((prev) => Math.min(prev + 100, stats?.track.length));
-        }, 100);
+            if (stats) {
+                const elapsed = Date.now() - lastReportedTime.current; 
+                const actualProgress = stats.position + elapsed;
+
+                setProgress(Math.min(actualProgress, stats.length)); 
+            }
+        }, 100); 
 
         return () => {
             clearInterval(interval);
-        }
-    });
+        };
+    }, [stats]);
 
     return (
         <>
@@ -53,13 +79,13 @@ function Player() {
                         <img src={`${cover}`} alt="Cover" width={600} height={600} />
                     </div>
                     <div className="info">
-                        <div className="title">{stats?.track.title}</div>
-                        <div className="artist">{stats?.track.author}</div>
+                        <div className="title">{stats?.title}</div>
+                        <div className="artist">{stats?.author}</div>
                     </div>
                 </div>
             </div>
             <div className="bar">
-                <div className="bar-fill" style={{ width: `${(progress / stats?.track.length) * 100}%` }} />
+                <div className="bar-fill" style={{ width: `${(progress / stats?.length) * 100}%` }} />
             </div>
         </>
     );
