@@ -7,6 +7,7 @@ import { uint8ArrayToBase64 } from 'uint8array-extras';
 
 const LIST_NAME = 'available_music_files';
 const DATA_PREFIX = 'music_data:';
+const COVER_PREFIX = 'cover_art:';
 
 const redisClient = createClient({
     url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`
@@ -47,13 +48,19 @@ async function indexMusicFiles() {
 
             const data = await parseFile(filePath);
 
-            await redisClient.set(`${DATA_PREFIX}${filePath}`, JSON.stringify({
+            const musicDataPromise = redisClient.set(`${DATA_PREFIX}${filePath}`, JSON.stringify({
                 title: data.common.title,
                 artists: data.common.artists,
                 album: data.common.album,
-                duration: data.format.duration,
-                cover: data.common.picture ? `data:${data.common.picture.format};base64,${uint8ArrayToBase64(data.common.picture.data)}` : null
+                duration: data.format.duration
             }));
+
+            let coverArtPromise = Promise.resolve();
+            if (data.common.picture) {
+                coverArtPromise = redisClient.set(`${COVER_PREFIX}${filePath}`, `data:${data.common.picture.format};base64,${uint8ArrayToBase64(data.common.picture.data)}`);
+            }
+
+            await Promise.all([musicDataPromise, coverArtPromise]);
         }
 
         console.log(`Successfully indexed ${filePaths.length} files into Redis.`);
