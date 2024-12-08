@@ -56,8 +56,8 @@ async function indexMusicFiles() {
             }));
 
             let coverArtPromise = Promise.resolve();
-            if (data.common.picture) {
-                coverArtPromise = redisClient.set(`${COVER_PREFIX}${filePath}`, `data:${data.common.picture.format};base64,${uint8ArrayToBase64(data.common.picture.data)}`);
+            if (data.common.picture && data.common.picture.length) {
+                coverArtPromise = redisClient.set(`${COVER_PREFIX}${filePath}`, `data:${data.common.picture[0].format};base64,${uint8ArrayToBase64(data.common.picture[0].data)}`);
             }
 
             await Promise.all([musicDataPromise, coverArtPromise]);
