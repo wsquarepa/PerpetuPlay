@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 
 import "./Player.css";
+import Controls from "./Controls";
 
 function Player() {
     const [stats, setStats] = useState(null);
@@ -35,6 +36,14 @@ function Player() {
             lastReportedTime.current = Date.now();
         });
 
+        eventSource.addEventListener("volume", (event) => {
+            setStats((prev) => ({ ...prev, volume: JSON.parse(event.data).value }));
+        });
+
+        eventSource.addEventListener("paused", (event) => {
+            setStats((prev) => ({ ...prev, paused: JSON.parse(event.data).value }));
+        });
+
         eventSource.addEventListener("initialize", (event) => {
             const data = JSON.parse(event.data);
 
@@ -42,7 +51,9 @@ function Player() {
                 title: data.title,
                 author: data.author,
                 length: data.length,
-                position: data.position
+                position: data.position,
+                volume: data.volume,
+                paused: data.paused
             });
 
             setCover(`/api/cover?f=${encodeURIComponent(data.identifier)}`);
@@ -88,6 +99,7 @@ function Player() {
             <div className="bar">
                 <div className="bar-fill" style={{ width: `${(progress / stats?.length) * 100}%` }} />
             </div>
+            <Controls isPlaying={!stats?.paused} volume={stats?.volume} />
         </>
     );
 }

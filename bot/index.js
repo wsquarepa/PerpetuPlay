@@ -99,7 +99,9 @@ subscriber.subscribe('im-ch-bot', async (message) => {
                 title: player.current.info.title,
                 author: player.current.info.author,
                 length: player.current.info.length,
-                position: player.position
+                position: player.position,
+                volume: player.volume,
+                paused: player.paused
             });
             break;
         }
