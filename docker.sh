@@ -12,15 +12,16 @@ TIMESTAMP=$(date +"%Y%m%d%H%M%S")
 
 # Help message
 usage() {
-    echo "Usage: $0 {up|down|restart|rebuild|backup|logs|help}"
+    echo "Usage: $0 {up|down|restart|rebuild|backup|logs|clean|help}"
     echo ""
     echo "Commands:"
     echo "  up           Start the Docker Compose services."
     echo "  down         Stop the Docker Compose services."
     echo "  restart      Restart the Docker Compose services."
-    echo "  rebuild      Rebuild and start the Docker Compose services."
+    echo "  rebuild      Rebuild and start the Docker Compose services, including volume cleanup."
     echo "  backup       Backup named volumes used by the Docker Compose."
     echo "  logs         Show logs for Docker Compose services."
+    echo "  clean        Stop services and remove associated named volumes."
     echo "  help         Display this help message."
     echo ""
     echo "Environment Variables:"
@@ -58,8 +59,10 @@ case "$1" in
         ;;
 
     rebuild)
-        echo "Rebuilding and starting Docker Compose services..."
-        $DOCKER_COMPOSE_CMD -f $DOCKER_COMPOSE_FILE down
+        echo "Rebuilding and starting Docker Compose services (with volume cleanup)..."
+        echo "Stopping services and removing named volumes..."
+        $DOCKER_COMPOSE_CMD -f $DOCKER_COMPOSE_FILE down -v
+        echo "Rebuilding images and starting services..."
         $DOCKER_COMPOSE_CMD -f $DOCKER_COMPOSE_FILE build
         $DOCKER_COMPOSE_CMD -f $DOCKER_COMPOSE_FILE up -d
         ;;
@@ -80,6 +83,12 @@ case "$1" in
     logs)
         echo "Showing logs for Docker Compose services..."
         $DOCKER_COMPOSE_CMD -f $DOCKER_COMPOSE_FILE logs -f
+        ;;
+
+    clean)
+        echo "Stopping Docker Compose services and removing associated volumes..."
+        $DOCKER_COMPOSE_CMD -f $DOCKER_COMPOSE_FILE down -v
+        echo "All services stopped, and named volumes removed."
         ;;
 
     help)

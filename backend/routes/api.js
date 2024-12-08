@@ -30,7 +30,7 @@ router.get('/status', async (req, res) => {
         });
 
         res.write(`data: ${JSON.stringify(result)}\n\n`);
-    }, 1000);
+    }, 3000);
 
     res.on('close', () => {
         clearInterval(interval);
@@ -39,15 +39,17 @@ router.get('/status', async (req, res) => {
 });
 
 router.get('/cover', async (req, res) => {
-    const filePath = req.query.file_path;
+    const filePath = req.query.f;
     const coverArt = await redisClient.get(`cover_art:${filePath}`);
 
     if (coverArt) {
-        res.send(coverArt);
+        const imgBuffer = Buffer.from(coverArt, 'base64');
+        res.setHeader('Content-Type', 'image/jpeg');
+        res.send(imgBuffer);
     } else {
         res.status(404).json({ error: 'Cover art not found' });
     }
-})
+});
 
 router.get('/queue', async (req, res) => {
     const page = parseInt(req.query.page) || 1;

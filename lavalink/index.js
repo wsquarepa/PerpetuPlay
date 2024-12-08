@@ -5,6 +5,8 @@ import { resolve, extname } from 'path';
 import { parseFile } from 'music-metadata';
 import { uint8ArrayToBase64 } from 'uint8array-extras';
 
+import sharp from 'sharp';
+
 const LIST_NAME = 'available_music_files';
 const DATA_PREFIX = 'music_data:';
 const COVER_PREFIX = 'cover_art:';
@@ -57,7 +59,11 @@ async function indexMusicFiles() {
 
             let coverArtPromise = Promise.resolve();
             if (data.common.picture && data.common.picture.length) {
-                coverArtPromise = redisClient.set(`${COVER_PREFIX}${filePath}`, `data:${data.common.picture[0].format};base64,${uint8ArrayToBase64(data.common.picture[0].data)}`);
+                const resizedImageBuffer = await sharp(data.common.picture[0].data)
+                    .resize(600, 600, { fit: 'inside' })
+                    .toBuffer();
+
+                coverArtPromise = redisClient.set(`${COVER_PREFIX}${filePath}`, uint8ArrayToBase64(resizedImageBuffer));
             }
 
             await Promise.all([musicDataPromise, coverArtPromise]);
