@@ -11,6 +11,7 @@
   "type": "module",
   "dependencies": {
     "music-metadata": "^10.6.2",
-    "redis": "^4.7.0"
+    "redis": "^4.7.0",
+    "uint8array-extras": "^1.4.0"
   }
 }
