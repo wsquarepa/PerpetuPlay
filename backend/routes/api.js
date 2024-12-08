@@ -82,4 +82,74 @@ router.get('/queue', async (req, res) => {
     res.json(dataArray);
 });
 
+router.post('/media', async (req, res) => {
+    const command = req.body.command;
+
+    switch (command) {
+        case 'play': {
+            const state = req.body.state;
+
+            if (!(typeof state === 'boolean')) {
+                res.status(400).json({ error: 'Invalid state' });
+                return;
+            }
+
+            await negotiate({
+                type: 'play',
+                state
+            });
+            res.json({ success: true });
+            break;
+        }
+        case 'skip': {
+            await negotiate({
+                type: 'skip'
+            });
+            res.json({ success: true });
+            break;
+        }
+        case 'rewind': {
+            await negotiate({
+                type: 'rewind'
+            });
+            res.json({ success: true });
+            break;
+        }
+        case 'volume': {
+            const volume = req.body.volume;
+
+            if (volume >= 0 && volume <= 100) {
+                await negotiate({
+                    type: 'volume',
+                    volume
+                });
+                res.json({ success: true });
+            } else {
+                res.status(400).json({ error: 'Invalid volume' });
+            }
+
+            break;
+        }
+        case 'seek': {
+            const position = req.body.position;
+
+            if (position >= 0) {
+                await negotiate({
+                    type: 'seek',
+                    position
+                });
+                res.json({ success: true });
+            } else {
+                res.status(400).json({ error: 'Invalid position' });
+            }
+
+            break;
+        }
+        default: {
+            res.status(400).json({ error: 'Invalid command' });
+            break;
+        }
+    }
+})
+
 export default router;

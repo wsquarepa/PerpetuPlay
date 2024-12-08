@@ -64,6 +64,7 @@ subscriber.subscribe('im-ch-bot', async (message) => {
     const { requestId, data } = JSON.parse(message);
 
     switch (data.type) {
+        // getters
         case 'login': {
             const userId = data.userId;
             const guildId = data.guildId;
@@ -105,6 +106,61 @@ subscriber.subscribe('im-ch-bot', async (message) => {
             });
             break;
         }
+        // setters
+        case 'play': {
+            const player = riffy.get(guildId);
+            player.pause(data.state);
+            respond(requestId, {
+                success: true
+            });
+            break;
+        }
+        case 'skip': {
+            const player = riffy.get(guildId);
+            player.stop();
+            respond(requestId, {
+                success: true
+            });
+            break;
+        }
+        case 'rewind': {
+            const player = riffy.get(guildId);
+            player.seek(0);
+            respond(requestId, {
+                success: true
+            });
+            break;
+        }
+        case 'volume': {
+            const player = riffy.get(guildId);
+            const volume = data.volume;
+
+            player.setVolume(volume);
+
+            respond(requestId, {
+                success: true
+            });
+            break;
+        }
+        case 'seek': {
+            const player = riffy.get(guildId);
+            const position = data.position;
+
+            if (position < 0 || position > player.current.info.length) {
+                return respond(requestId, {
+                    success: false,
+                    message: 'Invalid position'
+                });
+            }
+
+            player.seek(position);
+
+            respond(requestId, {
+                success: true
+            });
+            break;
+        }
+        // catch all
         default: {
             console.error(`Unknown message type: ${data.type}`);
             break;

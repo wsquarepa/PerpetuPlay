@@ -19,3 +19,11 @@
 .icon:hover {
     filter: brightness(1.5);
 }
+
+button {
+    background-color: transparent;
+    border: none;
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+}

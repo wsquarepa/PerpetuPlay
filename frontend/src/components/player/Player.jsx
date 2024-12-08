@@ -71,6 +71,11 @@ function Player() {
     useEffect(() => {
         const interval = setInterval(() => {
             if (stats) {
+                if (stats.paused) {
+                    setProgress(stats.position);
+                    return;
+                }
+
                 const elapsed = Date.now() - lastReportedTime.current; 
                 const actualProgress = stats.position + elapsed;
 
