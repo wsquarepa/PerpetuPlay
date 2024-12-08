@@ -39,6 +39,8 @@ const riffy = new Riffy(client, nodes, {
     restVersion: "v4"
 });
 
+let guildId = null;
+
 // Inter-app communication
 const redisClient = createClient({
     url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`
@@ -50,13 +52,21 @@ const subscriber = redisClient.duplicate();
 const publisher = redisClient.duplicate();
 await subscriber.connect()
 await publisher.connect()
+
+function respond(requestId, response) {
+    publisher.publish('im-ch-web', JSON.stringify({
+        requestId,
+        response
+    }));
+}
+
 subscriber.subscribe('im-ch-bot', async (message) => {
     console.log(`Received message: ${message}`);
 
     const { requestId, data } = JSON.parse(message);
 
     switch (data.type) {
-        case 'login':
+        case 'login': {
             const userId = data.userId;
             const guildId = data.guildId;
 
@@ -64,36 +74,38 @@ subscriber.subscribe('im-ch-bot', async (message) => {
             const member = await guild.members.fetch(userId);
             
             if (!member) {
-                return publisher.publish('im-ch-web', JSON.stringify({
-                    requestId,
-                    response: {
-                        success: false,
-                        message: 'User is not in the guild'
-                    }
-                }));
+                return respond(requestId, {
+                    success: false,
+                    message: 'User is not in the guild'
+                });
             }
 
             // check for manage guild permission
             if (!member.permissions.has(PermissionFlagsBits.ManageGuild, true)) {
-                return publisher.publish('im-ch-web', JSON.stringify({
-                    requestId,
-                    response: {
-                        success: false,
-                        message: 'User does not have the required permissions'
-                    }
-                }));
+                return respond(requestId, {
+                    success: false,
+                    message: 'User does not have the required permissions'
+                });
             }
 
-            publisher.publish('im-ch-web', JSON.stringify({
-                requestId,
-                response: {
-                    success: true
-                }
-            }));
+            respond(requestId, {
+                success: true
+            });
             break;
-        default:
+        }
+        case 'status': {
+            const player = riffy.get(guildId);
+            respond(requestId, {
+                success: true,
+                node: player.node.stats,
+                track: player.current.info
+            });
+            break;
+        }
+        default: {
             console.error(`Unknown message type: ${data.type}`);
             break;
+        }
     }
 });
 
@@ -151,9 +163,7 @@ async function getNextTrack(player) {
 
     const serverData = await player.node.rest.getTracks(filePath)
     
-    const track = new Track(serverData.data, client.user, player.node);
-
-    return track;
+    return new Track(serverData.data, client.user, player.node);
 }
 
 async function playNextTrack(player, retries = 0) {
@@ -219,8 +229,10 @@ client.on(Events.ClientReady, async () => {
         });
     });
 
+    guildId = channel.guild.id;
+
     const player = riffy.createConnection({
-        guildId: channel.guild.id,
+        guildId,
         voiceChannel: channel.id,
         textChannel: channel.id,
         deaf: true
