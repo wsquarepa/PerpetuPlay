@@ -98,7 +98,10 @@ subscriber.subscribe('im-ch-bot', async (message) => {
             respond(requestId, {
                 success: true,
                 node: player.node.stats,
-                track: player.current.info
+                track: {
+                    ...player.current.info,
+                    position: player.position
+                }
             });
             break;
         }
