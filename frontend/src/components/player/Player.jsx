@@ -3,6 +3,7 @@ import { useConnection } from "../../context/connectionHandler";
 
 import "./Player.css";
 import Controls from "./Controls";
+import Progress from "./Progress";
 
 import NoImage from "../../assets/NoImage.png";
 
@@ -104,7 +105,7 @@ function Player() {
             <div className="player">
                 <div className="display">
                     <div className="cover">
-                        <img src={`${cover || NoImage}`} alt="Cover" width={400} height={400} />
+                        <img src={`${cover || NoImage}`} alt="Cover" width={600} height={600} />
                     </div>
                     <div className="info">
                         <div className="title">{stats?.title}</div>
@@ -112,9 +113,7 @@ function Player() {
                     </div>
                 </div>
             </div>
-            <div className="bar">
-                <div className="bar-fill" style={{ width: `${(progress / stats?.length) * 100}%` }} />
-            </div>
+            <Progress current={progress} total={stats?.length || 0} />
             <Controls isPlaying={!stats?.paused} volume={stats?.volume || 100} />
         </>
     );
