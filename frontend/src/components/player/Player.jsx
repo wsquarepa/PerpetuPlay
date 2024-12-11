@@ -1,17 +1,27 @@
 import { useEffect, useState, useRef } from "react";
+import { useConnection } from "../../context/connectionHandler";
 
 import "./Player.css";
 import Controls from "./Controls";
 
 function Player() {
+    const { setConnected } = useConnection();
     const [stats, setStats] = useState(null);
     const [cover, setCover] = useState(null);
     const [progress, setProgress] = useState(0);
 
-    const lastReportedTime = useRef(Date.now()); 
+    const lastReportedTime = useRef(Date.now());
 
     useEffect(() => {
         const eventSource = new EventSource("/api/status");
+
+        eventSource.onopen = () => {
+            setConnected(true);
+        };
+
+        eventSource.onerror = () => {
+            setConnected(false);
+        };
 
         eventSource.addEventListener("identifier", (event) => {
             setCover(`/api/cover?f=${encodeURIComponent(JSON.parse(event.data).value)}`);
@@ -53,20 +63,19 @@ function Player() {
                 length: data.length,
                 position: data.position,
                 volume: data.volume,
-                paused: data.paused
+                paused: data.paused,
             });
 
             setCover(`/api/cover?f=${encodeURIComponent(data.identifier)}`);
 
             lastReportedTime.current = Date.now();
-            
             setProgress(data.position);
         });
 
         return () => {
             eventSource.close();
         };
-    }, []);
+    }, [setConnected]);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -76,12 +85,12 @@ function Player() {
                     return;
                 }
 
-                const elapsed = Date.now() - lastReportedTime.current; 
+                const elapsed = Date.now() - lastReportedTime.current;
                 const actualProgress = stats.position + elapsed;
 
-                setProgress(Math.min(actualProgress, stats.length)); 
+                setProgress(Math.min(actualProgress, stats.length));
             }
-        }, 100); 
+        }, 100);
 
         return () => {
             clearInterval(interval);
@@ -104,7 +113,7 @@ function Player() {
             <div className="bar">
                 <div className="bar-fill" style={{ width: `${(progress / stats?.length) * 100}%` }} />
             </div>
-            <Controls isPlaying={!stats?.paused} volume={stats?.volume} />
+            <Controls isPlaying={!stats?.paused} volume={stats?.volume || 100} />
         </>
     );
 }

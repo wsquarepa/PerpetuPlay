@@ -1,13 +1,13 @@
 import PropTypes from "prop-types";
 
-import PlayIcon from "../../assets/Play.svg";
-import PauseIcon from "../../assets/Pause.svg";
-import ForwardIcon from "../../assets/Forward.svg";
-import RewindIcon from "../../assets/Rewind.svg";
-import RepeatIcon from "../../assets/Repeat.svg";
-import VolumeNoneIcon from "../../assets/VolumeNone.svg";
-import VolumeLowIcon from "../../assets/VolumeLow.svg";
-import VolumeHighIcon from "../../assets/VolumeHigh.svg";
+import PlayIcon from "../../assets/IconPlay.svg";
+import PauseIcon from "../../assets/IconPause.svg";
+import ForwardIcon from "../../assets/IconForward.svg";
+import RewindIcon from "../../assets/IconRewind.svg";
+import RepeatIcon from "../../assets/IconRepeat.svg";
+import VolumeNoneIcon from "../../assets/IconVolumeNone.svg";
+import VolumeLowIcon from "../../assets/IconVolumeLow.svg";
+import VolumeHighIcon from "../../assets/IconVolumeHigh.svg";
 
 import "./Controls.css";
 

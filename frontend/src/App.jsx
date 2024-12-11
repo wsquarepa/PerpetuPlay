@@ -1,9 +1,13 @@
 import Content from "./components/Content";
+import Start from "./components/loader/Start";
+import { useEffect } from "react";
+import { useConnection } from "./context/connectionHandler";
+
 import "./App.css";
 
-import { useEffect } from "react";
-
 function App() {
+    const { connected } = useConnection();
+
     useEffect(() => {
         fetch("/api/")
             .then((response) => {
@@ -18,6 +22,7 @@ function App() {
 
     return (
         <>
+            {!connected && <Start />}
             <Content />
         </>
     );
