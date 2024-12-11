@@ -4,6 +4,8 @@ import { useConnection } from "../../context/connectionHandler";
 import "./Player.css";
 import Controls from "./Controls";
 
+import NoImage from "../../assets/NoImage.png";
+
 function Player() {
     const { setConnected } = useConnection();
     const [stats, setStats] = useState(null);
@@ -102,7 +104,7 @@ function Player() {
             <div className="player">
                 <div className="display">
                     <div className="cover">
-                        <img src={`${cover}`} alt="Cover" width={600} height={600} />
+                        <img src={`${cover || NoImage}`} alt="Cover" width={400} height={400} />
                     </div>
                     <div className="info">
                         <div className="title">{stats?.title}</div>
