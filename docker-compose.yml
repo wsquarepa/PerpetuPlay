@@ -9,6 +9,9 @@ services:
       interval: 1s
       timeout: 5s
       retries: 60
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
 
   lavalink:
     image: fredboat/lavalink:4.0-alpine
@@ -108,4 +111,5 @@ networks:
     driver: bridge
 
 volumes:
+  redis-data:
   frontend-build:
