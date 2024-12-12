@@ -246,6 +246,8 @@ async function playNextTrack(player, retries = 0) {
     console.log(`Playing: ${track.info.title} by ${track.info.author}`);
 }
 
+
+
 // discord stuff
 client.on(Events.MessageCreate, message => {
     if (message.author.bot) return;
@@ -295,6 +297,10 @@ client.on(Events.ClientReady, async () => {
         voiceChannel: channel.id,
         textChannel: channel.id,
         deaf: true
+    });
+
+    player.on('socketClosed', async () => {
+        console.warn('Socket closed? Unexpected behaviour');
     });
 
     await reloadPlaylist();
