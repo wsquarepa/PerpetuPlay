@@ -6,7 +6,7 @@
     background-color: rgba(0, 0, 0, 0.5);
     height: 80px;
     display: flex;
-    justify-content: space-around; /* or space-between */
+    justify-content: space-around;
     align-items: center;
 }
 

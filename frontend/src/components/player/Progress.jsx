@@ -24,14 +24,19 @@ function Progress({ current, total }) {
 
     const handleMouseMove = (event) => {
         const hoverValue = (calculateMousePosition(event, event.currentTarget) / 100) * total;
-
+    
         const minutes = Math.floor(hoverValue / 60000);
         const seconds = Math.floor((hoverValue % 60000) / 1000);
-
+    
         const time = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-
+    
         const rect = event.currentTarget.getBoundingClientRect();
-        setTooltip({ visible: true, time, x: event.clientX, y: rect.top - 20 });
+        setTooltip({ 
+            visible: true, 
+            time, 
+            x: event.clientX - 20,
+            y: rect.top - 10
+        });
     };
 
     const handleMouseLeave = () => {

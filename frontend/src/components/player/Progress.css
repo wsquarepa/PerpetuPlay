@@ -16,11 +16,25 @@
 
 .tooltip {
     position: fixed;
-    background-color: #3E7BEC;
+    display: block;
+    background-color: #2C5BA8;
     color: white;
-    padding: 5px;
+    padding: 5px 8px;
     border-radius: 5px;
     font-size: 12px;
-    display: none;
     z-index: 999;
+    transform: translateY(-25px);
+}
+
+.tooltip::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #2C5BA8;
 }
