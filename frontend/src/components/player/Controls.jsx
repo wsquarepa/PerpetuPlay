@@ -1,3 +1,4 @@
+import { useState } from "react";
 import PropTypes from "prop-types";
 
 import PlayIcon from "../../assets/IconPlay.svg";
@@ -12,8 +13,12 @@ import VolumeHighIcon from "../../assets/IconVolumeHigh.svg";
 import "./Controls.css";
 
 import sendCommand from "../../util/mediaControls";
+import VolumeSlider from "./VolumeSlider";
 
 function Controls({ isPlaying, volume }) {
+    const [isVolumePopupVisible, setVolumePopupVisible] = useState(false);
+    const [currentVolume, setCurrentVolume] = useState(volume);
+
     const handlePlayPause = () => {
         sendCommand("play", { state: isPlaying });
     };
@@ -31,7 +36,15 @@ function Controls({ isPlaying, volume }) {
     };
 
     const handleVolumeChange = (newVolume) => {
+        setCurrentVolume(newVolume);
+    };
+
+    const handleVolumeCommit = (newVolume) => {
         sendCommand("volume", { volume: newVolume });
+    };
+
+    const toggleVolumePopup = () => {
+        setVolumePopupVisible(!isVolumePopupVisible);
     };
 
     return (
@@ -52,18 +65,24 @@ function Controls({ isPlaying, volume }) {
             <button className="icon-button" onClick={handleForward}>
                 <ForwardIcon className="icon" />
             </button>
-            <button
-                className="icon-button"
-                onClick={() => handleVolumeChange(volume === 0 ? 50 : 0)}
-            >
-                {volume === 0 ? (
-                    <VolumeNoneIcon className="icon" />
-                ) : volume < 50 ? (
-                    <VolumeLowIcon className="icon" />
-                ) : (
-                    <VolumeHighIcon className="icon" />
+            <div>
+                {isVolumePopupVisible && (
+                    <VolumeSlider
+                        volume={currentVolume}
+                        onVolumeChange={handleVolumeChange}
+                        onVolumeCommit={handleVolumeCommit}
+                    />
                 )}
-            </button>
+                <button className="icon-button" onClick={toggleVolumePopup}>
+                    {currentVolume === 0 ? (
+                        <VolumeNoneIcon className="icon" />
+                    ) : currentVolume < 50 ? (
+                        <VolumeLowIcon className="icon" />
+                    ) : (
+                        <VolumeHighIcon className="icon" />
+                    )}
+                </button>
+            </div>
         </div>
     );
 }
