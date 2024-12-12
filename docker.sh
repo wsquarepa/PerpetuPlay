@@ -19,7 +19,6 @@ usage() {
     echo "  down         Stop the Docker Compose services."
     echo "  restart      Restart the Docker Compose services."
     echo "  rebuild      Rebuild and start the Docker Compose services, including volume cleanup."
-    echo "  rebuild-fe   Rebuild and restart only the frontend container."
     echo "  backup       Backup named volumes used by the Docker Compose."
     echo "  logs         Show logs for Docker Compose services."
     echo "  clean        Stop services and remove associated named volumes."
@@ -66,12 +65,6 @@ case "$1" in
         echo "Rebuilding images and starting services..."
         $DOCKER_COMPOSE_CMD -f $DOCKER_COMPOSE_FILE build
         $DOCKER_COMPOSE_CMD -f $DOCKER_COMPOSE_FILE up -d
-        ;;
-
-    rebuild-fe)
-        echo "Rebuilding and restarting frontend container..."
-        $DOCKER_COMPOSE_CMD -f $DOCKER_COMPOSE_FILE build frontend
-        $DOCKER_COMPOSE_CMD -f $DOCKER_COMPOSE_FILE up -d frontend
         ;;
 
     backup)
