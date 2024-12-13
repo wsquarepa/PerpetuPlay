@@ -4,14 +4,17 @@ import { useConnection } from "../../context/connectionHandler";
 import "./Player.css";
 import Controls from "./Controls";
 import Progress from "./Progress";
+import Queue from "../queue/Queue";
 
 import NoImage from "../../assets/NoImage.png";
+import IconSidebar from "../../assets/IconSidebar.svg";
 
 function Player() {
     const { setConnected } = useConnection();
     const [stats, setStats] = useState(null);
     const [cover, setCover] = useState(null);
     const [progress, setProgress] = useState(0);
+    const [queueVisible, setQueueVisible] = useState(false);
 
     const lastReportedTime = useRef(Date.now());
 
@@ -115,6 +118,13 @@ function Player() {
             </div>
             <Progress current={progress} total={stats?.length || 0} />
             <Controls isPlaying={!stats?.paused} volume={stats?.volume || 100} />
+
+            <div className="queue-holder">
+                <button className="queue-button" onClick={() => setQueueVisible((prev) => !prev)}>
+                    <IconSidebar />
+                </button>
+                {queueVisible && <Queue />}
+            </div>
         </>
     );
 }

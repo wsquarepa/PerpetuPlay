@@ -1,6 +1,6 @@
 .volume-slider {
     position: absolute;
-    transform: translate(0%, -110%);
+    transform: translateY(-110%);
 
     display: flex;
     flex-direction: column;
