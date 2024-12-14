@@ -9,6 +9,8 @@ import apiRoutes from './routes/api.js';
 
 const app = express();
 
+app.set('trust proxy', true);
+
 app.use(cookieParser());
 app.disable('x-powered-by');
 app.use(express.json());
