@@ -1,0 +1,29 @@
+.volume-slider {
+    position: absolute;
+    transform: translateY(-110%);
+
+    display: flex;
+    flex-direction: column;
+
+    width: 96px;
+
+    padding: 5px;
+    border-radius: 10%;
+}
+
+.volume-display {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.volume-slider input {
+    appearance: slider-vertical; /* WebKit */
+    writing-mode: bt-lr; /* IE */
+
+    height: 100%;
+    margin: 0 auto;
+    padding: 0;
+
+    width: 20px;
+}

@@ -131,3 +131,6 @@ Literally spam your keyboard and you'll be fine.
 [Lavalink](https://lavalink.dev) - Music streaming library  
 [Riffy](https://github.com/riffy-team/riffy) - Lavalink API wrapper  
 [ExpressJS](https://expressjs.com/) - Web server package  
+[React](https://reactjs.org/) - Frontend framework  
+[Vite](https://vitejs.dev/) - Frontend bundler  
+[Simple Design System](https://www.figma.com/community/file/1380235722331273046/simple-design-system) - Frontend icons

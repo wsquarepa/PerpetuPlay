@@ -10,6 +10,9 @@
   "description": "",
   "type": "module",
   "dependencies": {
-    "redis": "^4.7.0"
+    "music-metadata": "^10.6.2",
+    "redis": "^4.7.0",
+    "sharp": "^0.33.5",
+    "uint8array-extras": "^1.4.0"
   }
 }

@@ -39,6 +39,8 @@ const riffy = new Riffy(client, nodes, {
     restVersion: "v4"
 });
 
+let guildId = null;
+
 // Inter-app communication
 const redisClient = createClient({
     url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`
@@ -46,16 +48,24 @@ const redisClient = createClient({
 
 redisClient.on('error', (error) => { console.error(error); });
 
-const publisher = redisClient.duplicate();
 const subscriber = redisClient.duplicate();
+const publisher = redisClient.duplicate();
 await subscriber.connect()
-subscriber.subscribe('im-ch-bot', async (message) => {
-    console.log(`Received message: ${message}`);
+await publisher.connect()
 
+function respond(requestId, response) {
+    publisher.publish('im-ch-web', JSON.stringify({
+        requestId,
+        response
+    }));
+}
+
+subscriber.subscribe('im-ch-bot', async (message) => {
     const { requestId, data } = JSON.parse(message);
 
     switch (data.type) {
-        case 'login':
+        // getters
+        case 'login': {
             const userId = data.userId;
             const guildId = data.guildId;
 
@@ -63,36 +73,113 @@ subscriber.subscribe('im-ch-bot', async (message) => {
             const member = await guild.members.fetch(userId);
             
             if (!member) {
-                return publisher.publish('im-ch-web', JSON.stringify({
-                    requestId,
-                    response: {
-                        success: false,
-                        message: 'User is not in the guild'
-                    }
-                }));
+                return respond(requestId, {
+                    success: false,
+                    message: 'User is not in the guild'
+                });
             }
 
             // check for manage guild permission
             if (!member.permissions.has(PermissionFlagsBits.ManageGuild, true)) {
-                return publisher.publish('im-ch-web', JSON.stringify({
-                    requestId,
-                    response: {
-                        success: false,
-                        message: 'User does not have the required permissions'
-                    }
-                }));
+                return respond(requestId, {
+                    success: false,
+                    message: 'User does not have the required permissions'
+                });
             }
 
-            publisher.publish('im-ch-web', JSON.stringify({
-                requestId,
-                response: {
-                    success: true
-                }
-            }));
+            respond(requestId, {
+                success: true
+            });
             break;
-        default:
+        }
+        case 'status': {
+            const player = riffy.get(guildId);
+            respond(requestId, {
+                success: true,
+                identifier: player.current.info.identifier,
+                title: player.current.info.title,
+                author: player.current.info.author,
+                length: player.current.info.length,
+                position: player.position,
+                volume: player.volume,
+                paused: player.paused,
+                loop: player.loop == 'none' ? false : true
+            });
+            break;
+        }
+        // setters
+        case 'play': {
+            const player = riffy.get(guildId);
+            player.pause(data.state);
+            respond(requestId, {
+                success: true
+            });
+            break;
+        }
+        case 'skip': {
+            const player = riffy.get(guildId);
+            player.stop();
+            respond(requestId, {
+                success: true
+            });
+            break;
+        }
+        case 'rewind': {
+            const player = riffy.get(guildId);
+            player.seek(0);
+            respond(requestId, {
+                success: true
+            });
+            break;
+        }
+        case 'volume': {
+            const player = riffy.get(guildId);
+            const volume = data.volume;
+
+            player.setVolume(volume);
+
+            respond(requestId, {
+                success: true
+            });
+            break;
+        }
+        case 'seek': {
+            const player = riffy.get(guildId);
+            const position = data.position;
+
+            if (position < 0 || position > player.current.info.length) {
+                return respond(requestId, {
+                    success: false,
+                    message: 'Invalid position'
+                });
+            }
+
+            player.seek(position);
+
+            respond(requestId, {
+                success: true
+            });
+            break;
+        }
+        case 'repeat': {
+            const player = riffy.get(guildId);
+
+            if (player.loop == 'none') {
+                player.setLoop('track');
+            } else {
+                player.setLoop('none');
+            }
+
+            respond(requestId, {
+                success: true
+            });
+            break;
+        }
+        // catch all
+        default: {
             console.error(`Unknown message type: ${data.type}`);
             break;
+        }
     }
 });
 
@@ -150,9 +237,7 @@ async function getNextTrack(player) {
 
     const serverData = await player.node.rest.getTracks(filePath)
     
-    const track = new Track(serverData.data, client.user, player.node);
-
-    return track;
+    return new Track(serverData.data, client.user, player.node);
 }
 
 async function playNextTrack(player, retries = 0) {
@@ -175,6 +260,8 @@ async function playNextTrack(player, retries = 0) {
     client.user.setActivity(track.info.title + " | " + track.info.author, { type: ActivityType.Listening });
     console.log(`Playing: ${track.info.title} by ${track.info.author}`);
 }
+
+
 
 // discord stuff
 client.on(Events.MessageCreate, message => {
@@ -218,11 +305,17 @@ client.on(Events.ClientReady, async () => {
         });
     });
 
+    guildId = channel.guild.id;
+
     const player = riffy.createConnection({
-        guildId: channel.guild.id,
+        guildId,
         voiceChannel: channel.id,
         textChannel: channel.id,
         deaf: true
+    });
+
+    player.on('socketClosed', async () => {
+        console.warn('Socket closed? Unexpected behaviour');
     });
 
     await reloadPlaylist();
