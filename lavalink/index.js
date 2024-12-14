@@ -60,6 +60,8 @@ async function processFile(filePath) {
     }
 
     await Promise.all([musicDataPromise, coverArtPromise]);
+
+    console.log('Processed:', filePath);
 }
 
 async function indexMusicFiles() {
