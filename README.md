@@ -52,7 +52,7 @@ Prerequisite software requirements:
     ```
 
 4. Edit the environment file with your favorite editing tool
-5. Upload your music to `./lavalink/music/`. Most audio formats should work, though this is subject to support by [Lavalink](https://github.com/lavalink-devs/lavaplayer?tab=readme-ov-file#supported-formats).
+5. Upload your music to `./lavalink/music/`. Most audio formats should work, though this is subject to support by [Lavalink](https://github.com/lavalink-devs/lavaplayer?tab=readme-ov-file#supported-formats). **NOTE:** If you update your music library, you will need to flush and rebuild the project. Refer to the "Updating" section for more information.
 6. Run the service
 
     ```sh
@@ -65,6 +65,25 @@ To manage your bot, visit `http://[ip]:[port]` for further instructions. You can
   
 Logs can be viewed at any time using `./docker.sh logs`. Should you need to disable the bot, you can do so using `./docker.sh down`.  
   
+# Updating
+
+To update your music library, follow these steps. If you don't perform these steps, the bot will not know about your new music.
+
+1. Stop the bot while purging all volumes.
+
+    ```sh
+    ./docker.sh clean
+    ```
+
+2. Upload your new music to `./lavalink/music/`.
+3. Rebuild all containers
+
+    ```sh
+    ./docker.sh rebuild
+    ```
+
+Your music library is now updated.
+
 To update the bot, follow these steps.
 
 1. Enter the directory containing the repository if you aren't already there.

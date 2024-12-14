@@ -112,9 +112,13 @@ async function indexMusicFiles() {
         console.log("Connecting to Redis...");
         await redisClient.connect();
 
-        // Clear any existing data in the list
-        await redisClient.del(LIST_NAME);
-        console.log(`Cleared Redis list: ${LIST_NAME}`);
+        // Check if the list exists
+        const listExists = await redisClient.exists(LIST_NAME);
+        if (listExists) {
+            console.log(`List ${LIST_NAME} already exists. Probably already indexed.`);
+            await redisClient.disconnect();
+            process.exit(0);
+        }
 
         // Resolve the music directory
         const musicDir = resolve("/opt/Lavalink/music");
