@@ -11,7 +11,7 @@ function Queue() {
     useEffect(() => {
         async function fetchQueue() {
             try {
-                const response = await fetch('/api/queue');
+                const response = await fetch('/api/queue?page=1');
                 const data = await response.json();
                 setSongs(data);
             } catch (error) {

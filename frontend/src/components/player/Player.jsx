@@ -69,7 +69,7 @@ function Player() {
                 length: data.length,
                 position: data.position,
                 volume: data.volume,
-                paused: data.paused,
+                paused: data.paused
             });
 
             setCover(`/api/cover?f=${encodeURIComponent(data.identifier)}`);
