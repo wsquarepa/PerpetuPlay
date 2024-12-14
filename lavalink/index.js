@@ -10,7 +10,7 @@ import sharp from 'sharp';
 const LIST_NAME = 'available_music_files';
 const DATA_PREFIX = 'music_data:';
 const COVER_PREFIX = 'cover_art:';
-const PARALLEL_PROCESSING = 4; // Define the number of files to process in parallel
+const PARALLEL_PROCESSING = 4;
 
 const redisClient = createClient({
     url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`
@@ -39,12 +39,10 @@ async function getAllFilePaths(dir) {
 async function processFile(filePath) {
     console.log('Processing:', filePath);
 
-    // Add file path to Redis list
     await redisClient.lPush(LIST_NAME, filePath);
 
     const data = await parseFile(filePath);
 
-    // Store music metadata in Redis
     const musicDataPromise = redisClient.set(`${DATA_PREFIX}${filePath}`, JSON.stringify({
         title: data.common.title,
         artists: data.common.artists,
@@ -61,7 +59,6 @@ async function processFile(filePath) {
         coverArtPromise = redisClient.set(`${COVER_PREFIX}${filePath}`, uint8ArrayToBase64(resizedImageBuffer));
     }
 
-    // Wait for all Redis operations to complete
     await Promise.all([musicDataPromise, coverArtPromise]);
 }
 
@@ -83,7 +80,6 @@ async function indexMusicFiles() {
             batches.push(Promise.all(batch));
         }
 
-        // Process all batches sequentially
         for (const batch of batches) {
             await batch;
         }

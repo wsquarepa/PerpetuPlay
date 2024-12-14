@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 
 import PlayIcon from "../../assets/IconPlay.svg";
@@ -18,6 +18,10 @@ import VolumeSlider from "./VolumeSlider";
 function Controls({ isPlaying, volume }) {
     const [isVolumePopupVisible, setVolumePopupVisible] = useState(false);
     const [currentVolume, setCurrentVolume] = useState(volume);
+
+    useEffect(() => {
+        setCurrentVolume(volume);
+    }, [volume]);
 
     const handlePlayPause = () => {
         sendCommand("play", { state: isPlaying });

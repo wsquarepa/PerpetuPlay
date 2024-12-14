@@ -1,9 +1,14 @@
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { useState } from "react";
+
 import "./VolumeSlider.css";
 
 function VolumeSlider({ volume, onVolumeChange, onVolumeCommit }) {
     const [localVolume, setLocalVolume] = useState(volume);
+
+    useEffect(() => {
+        setLocalVolume(volume);
+    }, [volume]);
 
     const handleSliderChange = (e) => {
         const newVolume = parseInt(e.target.value, 10);
