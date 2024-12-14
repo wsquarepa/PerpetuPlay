@@ -169,4 +169,6 @@ async function indexMusicFiles() {
     }
 }
 
+console.log("Starting music file indexing with concurrency factor of", CONCURRENCY);
+
 indexMusicFiles();
