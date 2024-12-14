@@ -241,6 +241,13 @@ async function getNextTrack(player) {
 }
 
 async function playNextTrack(player, retries = 0) {
+    if (!player.connected) {
+        console.error('Player is not connected. Attempting to reconnect.');
+        const newPlayer = await joinVC();
+        await playNextTrack(newPlayer);
+        return;
+    }
+
     const track = await getNextTrack(player);
 
     if (!track) {
@@ -261,9 +268,27 @@ async function playNextTrack(player, retries = 0) {
     console.log(`Playing: ${track.info.title} by ${track.info.author}`);
 }
 
-
-
 // discord stuff
+async function joinVC() {
+    const channel = await client.channels.fetch(CHANNEL_ID);
+
+    if (!channel.isVoiceBased()) {
+        console.error('Channel is not voice based');
+        return;
+    }
+
+    guildId = channel.guild.id;
+
+    const player = riffy.createConnection({
+        guildId,
+        voiceChannel: channel.id,
+        textChannel: channel.id,
+        deaf: true
+    });
+
+    return player;
+}
+
 client.on(Events.MessageCreate, message => {
     if (message.author.bot) return;
     if (!message.mentions.has(client.user)) return;
@@ -292,31 +317,13 @@ client.on(Events.ClientReady, async () => {
     riffy.init(client.user.id);
     console.log(`Logged in as ${client.user.tag}!`);
 
-    const channel = await client.channels.fetch(CHANNEL_ID);
-
-    if (!channel.isVoiceBased()) {
-        console.error('Channel is not voice based');
-        return;
-    }
-
     await new Promise((resolve) => {
         riffy.once('nodeConnect', () => {
             resolve();
         });
     });
 
-    guildId = channel.guild.id;
-
-    const player = riffy.createConnection({
-        guildId,
-        voiceChannel: channel.id,
-        textChannel: channel.id,
-        deaf: true
-    });
-
-    player.on('socketClosed', async () => {
-        console.warn('Socket closed? Unexpected behaviour');
-    });
+    const player = await joinVC();
 
     await reloadPlaylist();
 
@@ -328,9 +335,13 @@ riffy.on('nodeConnect', (node) => {
     console.log(`Node ${node.name} connected`);
 });
 
-riffy.on('nodeError', (node, error) => {
+riffy.on('nodeError', async (node, error) => {
     console.error(`Node ${node.name} encountered an error: ${error}`);
 });
+
+riffy.on('nodeDisconnect', async (node) => {
+    console.error(`Node ${node.name} disconnected`);
+})
 
 riffy.on('queueEnd', async (player) => {
     playNextTrack(player);
@@ -340,5 +351,12 @@ client.on(Events.Raw, (d) => {
     if (![GatewayDispatchEvents.VoiceStateUpdate, GatewayDispatchEvents.VoiceServerUpdate].includes(d.t)) return;
     riffy.updateVoiceState(d);
 });
+
+client.on(Events.VoiceStateUpdate, (oldState, newState) => {
+    if (oldState.member.id === client.user.id && !newState.channelId) {
+        console.log('Bot disconnected from all voice channels, attempting to reconnect');
+        joinVC();
+    }
+})
 
 client.login(DISCORD_BOT_TOKEN);
