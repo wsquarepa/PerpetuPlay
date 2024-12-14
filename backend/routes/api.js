@@ -1,30 +1,9 @@
 import express from 'express';
-import rateLimit from 'express-rate-limit';
 
 import { negotiate } from '../negotiator.js';
 import { redisClient } from '../config/redis.js';
 
 const router = express.Router();
-
-const statusLimit = rateLimit({
-    windowMs: 1000,
-    max: 1
-});
-
-const mediaLimit = rateLimit({
-    windowMs: 60 * 1000,
-    max: 100
-});
-
-const coverLimit = rateLimit({
-    windowMs: 5 * 60 * 1000,
-    max: 60 * 1000
-});
-
-const queueLimit = rateLimit({
-    windowMs: 2 * 60 * 1000,
-    max: 100
-});
 
 router.use((req, res, next) => {
     if (req.isAuthenticated()) {
@@ -38,7 +17,7 @@ router.get('/', (req, res) => {
     res.json({ message: 'Hello, world!' });
 });
 
-router.get('/status', statusLimit, async (req, res) => {
+router.get('/status', async (req, res) => {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -73,7 +52,7 @@ router.get('/status', statusLimit, async (req, res) => {
     });
 });
 
-router.get('/cover', coverLimit, async (req, res) => {
+router.get('/cover', async (req, res) => {
     const filePath = req.query.f;
     const coverArt = await redisClient.get(`cover_art:${filePath}`);
 
@@ -86,7 +65,7 @@ router.get('/cover', coverLimit, async (req, res) => {
     }
 });
 
-router.get('/queue', queueLimit, async (req, res) => {
+router.get('/queue', async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 20;
     const start = (page - 1) * limit;
@@ -103,7 +82,7 @@ router.get('/queue', queueLimit, async (req, res) => {
     res.json(dataArray);
 });
 
-router.post('/media', mediaLimit, async (req, res) => {
+router.post('/media', async (req, res) => {
     const command = req.body.command;
 
     switch (command) {
