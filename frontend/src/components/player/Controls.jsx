@@ -15,7 +15,7 @@ import "./Controls.css";
 import sendCommand from "../../util/mediaControls";
 import VolumeSlider from "./VolumeSlider";
 
-function Controls({ isPlaying, volume }) {
+function Controls({ isPlaying, volume, loop }) {
     const [isVolumePopupVisible, setVolumePopupVisible] = useState(false);
     const [currentVolume, setCurrentVolume] = useState(volume);
 
@@ -53,7 +53,7 @@ function Controls({ isPlaying, volume }) {
 
     return (
         <div className="controls">
-            <button className="icon-button" onClick={handleRepeat}>
+            <button className={`icon-button ${loop ? "active" : ""}`} onClick={handleRepeat}>
                 <RepeatIcon className="icon" />
             </button>
             <button className="icon-button" onClick={handleRewind}>
@@ -94,6 +94,7 @@ function Controls({ isPlaying, volume }) {
 Controls.propTypes = {
     isPlaying: PropTypes.bool.isRequired,
     volume: PropTypes.number.isRequired,
+    loop: PropTypes.bool.isRequired
 };
 
 export default Controls;

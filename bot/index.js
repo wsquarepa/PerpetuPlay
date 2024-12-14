@@ -102,7 +102,8 @@ subscriber.subscribe('im-ch-bot', async (message) => {
                 length: player.current.info.length,
                 position: player.position,
                 volume: player.volume,
-                paused: player.paused
+                paused: player.paused,
+                loop: player.loop == 'none' ? false : true
             });
             break;
         }
@@ -154,6 +155,20 @@ subscriber.subscribe('im-ch-bot', async (message) => {
             }
 
             player.seek(position);
+
+            respond(requestId, {
+                success: true
+            });
+            break;
+        }
+        case 'repeat': {
+            const player = riffy.get(guildId);
+
+            if (player.loop == 'none') {
+                player.setLoop('track');
+            } else {
+                player.setLoop('none');
+            }
 
             respond(requestId, {
                 success: true

@@ -145,6 +145,13 @@ router.post('/media', async (req, res) => {
 
             break;
         }
+        case 'repeat': {
+            await negotiate({
+                type: 'repeat'
+            });
+            res.json({ success: true });
+            break;
+        }
         default: {
             res.status(400).json({ error: 'Invalid command' });
             break;

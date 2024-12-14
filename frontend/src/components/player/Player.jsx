@@ -60,6 +60,10 @@ function Player() {
             setStats((prev) => ({ ...prev, paused: JSON.parse(event.data).value }));
         });
 
+        eventSource.addEventListener("loop", (event) => {
+            setStats((prev) => ({ ...prev, loop: JSON.parse(event.data).value }));
+        });
+
         eventSource.addEventListener("initialize", (event) => {
             const data = JSON.parse(event.data);
 
@@ -69,7 +73,8 @@ function Player() {
                 length: data.length,
                 position: data.position,
                 volume: data.volume,
-                paused: data.paused
+                paused: data.paused,
+                loop: data.loop
             });
 
             setCover(`/api/cover?f=${encodeURIComponent(data.identifier)}`);
@@ -117,7 +122,7 @@ function Player() {
                 </div>
             </div>
             <Progress current={progress} total={stats?.length || 0} />
-            <Controls isPlaying={!stats?.paused} volume={stats?.volume || 100} />
+            <Controls isPlaying={!stats?.paused} volume={stats?.volume || 100} loop={stats?.loop} />
 
             <div className="queue-holder">
                 <button className="queue-button" onClick={() => setQueueVisible((prev) => !prev)}>
