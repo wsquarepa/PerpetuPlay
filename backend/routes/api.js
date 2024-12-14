@@ -1,9 +1,17 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 
 import { negotiate } from '../negotiator.js';
 import { redisClient } from '../config/redis.js';
 
 const router = express.Router();
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+});
+
+router.use(limiter);
 
 router.use((req, res, next) => {
     if (req.isAuthenticated()) {

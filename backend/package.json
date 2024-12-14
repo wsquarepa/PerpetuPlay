@@ -16,6 +16,7 @@
     "express-session": "^1.18.1",
     "passport": "^0.7.0",
     "passport-discord": "^0.1.4",
-    "redis": "^4.7.0"
+    "redis": "^4.7.0",
+    "express-rate-limit": "^7.4.1"
   }
 }
