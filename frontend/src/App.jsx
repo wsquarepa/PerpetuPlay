@@ -12,7 +12,7 @@ function App() {
         fetch("/api/")
             .then((response) => {
                 if (response.status === 401) {
-                    window.location.href = `${window.location.origin}/auth`;
+                    location.assign("/auth");
                 }
             })
             .catch((error) => {
