@@ -7,40 +7,56 @@ import './Queue.css';
 function Queue() {
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
+
+    async function fetchQueue(page = 1) {
+        try {
+            setIsFetchingNextPage(true);
+            const response = await fetch('/api/queue?page=' + page);
+            const data = await response.json();
+            if (data.length > 0) {
+                setSongs(prevSongs => [...prevSongs, ...data]);
+                setCurrentPage(page);
+            }
+        } catch (error) {
+            console.error('Error fetching queue:', error);
+        } finally {
+            setLoading(false);
+            setIsFetchingNextPage(false);
+        }
+    }
 
     useEffect(() => {
-        async function fetchQueue() {
-            try {
-                const response = await fetch('/api/queue?page=1');
-                const data = await response.json();
-                setSongs(data);
-            } catch (error) {
-                console.error('Error fetching queue:', error);
-            } finally {
-                setLoading(false);
-            }
-        }
-
         fetchQueue();
     }, []);
+
+    function handleScroll(e) {
+        const { scrollHeight, scrollTop, clientHeight } = e.target;
+        if (scrollHeight - scrollTop === clientHeight && !isFetchingNextPage) {
+            fetchQueue(currentPage + 1);
+        }
+    }
 
     return (
         <div className="queue">
             <h2>Queue</h2>
-            {loading ? (
-                <p>Loading...</p>
-            ) : songs.length > 0 ? (
-                songs.map((song, index) => (
-                    <Song
-                        key={index}
-                        title={song.title}
-                        artist={song.artists.join(', ')}
-                        duration={formatDuration(song.duration)}
-                    />
-                ))
-            ) : (
-                <p>No songs in the queue.</p>
-            )}
+            <div className="queue-content" onScroll={handleScroll}>
+                {loading ? (
+                    <p>Loading...</p>
+                ) : songs.length > 0 ? (
+                    songs.map((song, index) => (
+                        <Song
+                            key={index}
+                            title={song.title}
+                            artist={song.artists.join(', ')}
+                            duration={formatDuration(song.duration)}
+                        />
+                    ))
+                ) : (
+                    <p>No songs in the queue.</p>
+                )}
+            </div>
         </div>
     );
 }

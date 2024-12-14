@@ -4,6 +4,9 @@
     background-color: #1b1b1b;
     border-top-left-radius: 8px;
     border-bottom-left-radius: 8px;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .queue h2 {
@@ -16,4 +19,11 @@
     text-align: center;
     font-size: 16px;
     margin-top: 20px;
+}
+
+.queue-content {
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    flex: 1;
 }
